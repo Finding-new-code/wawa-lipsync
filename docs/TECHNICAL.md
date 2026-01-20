@@ -1,4 +1,4 @@
-# Wawa Lipsync - Technical Documentation
+# Lipsync - Technical Documentation
 
 A real-time lipsync library that analyzes audio frequencies to detect visemes (mouth shapes) for animating 2D/3D characters.
 
@@ -212,6 +212,193 @@ audio.play();
 | `historySize` | More responsive, jittery | Smoother, more latency |
 
 **Recommended defaults**: `fftSize: 2048`, `historySize: 10`
+
+---
+
+## 3D Model Requirements
+
+### Required Morph Targets (Blend Shapes)
+
+For the library to animate your 3D model, it must have morph targets/blend shapes corresponding to the 15 visemes:
+
+| Morph Target Name | Required | Description |
+|-------------------|----------|-------------|
+| `viseme_sil` | ✅ Yes | Closed/neutral mouth |
+| `viseme_PP` | ✅ Yes | Lips pressed (P, B, M) |
+| `viseme_FF` | ✅ Yes | Lower lip to teeth (F, V) |
+| `viseme_TH` | ⚠️ Optional | Tongue between teeth |
+| `viseme_DD` | ✅ Yes | Tongue to roof (D, T) |
+| `viseme_kk` | ✅ Yes | Mouth open, tongue back (K, G) |
+| `viseme_CH` | ⚠️ Optional | Lips forward (Ch, J, Sh) |
+| `viseme_SS` | ✅ Yes | Teeth together (S, Z) |
+| `viseme_nn` | ⚠️ Optional | Mouth slightly open (N, L) |
+| `viseme_RR` | ⚠️ Optional | Lips rounded (R) |
+| `viseme_aa` | ✅ Yes | Mouth wide open (ah) |
+| `viseme_E` | ✅ Yes | Mouth semi-open (eh) |
+| `viseme_I` | ✅ Yes | Lips spread (ee) |
+| `viseme_O` | ✅ Yes | Lips rounded (oh) |
+| `viseme_U` | ✅ Yes | Lips pursed (oo) |
+
+> **Note**: At minimum, include the 10 visemes marked as "Yes" for basic lipsync. Optional visemes improve accuracy but can fallback to similar shapes.
+
+---
+
+### Model Format Recommendations
+
+#### glTF/GLB (Recommended)
+
+```javascript
+// Load model with morph targets
+import { useGLTF } from '@react-three/drei';
+
+const { scene } = useGLTF('/avatar.glb');
+const head = scene.getObjectByName('Head');
+
+// Access morph targets
+const morphTargets = head.morphTargetDictionary;
+const morphInfluences = head.morphTargetInfluences;
+```
+
+**Requirements**:
+- Morph targets must be in `mesh.morphTargetDictionary`
+- Target names must match viseme enum values exactly
+- Weights should be 0.0-1.0 range
+
+---
+
+#### VRM Models
+
+VRM models (common for VTubers) work well with this library:
+
+```javascript
+import { VRMLoaderPlugin } from '@pixiv/three-vrm';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
+const loader = new GLTFLoader();
+loader.register((parser) => new VRMLoaderPlugin(parser));
+
+loader.load('/avatar.vrm', (gltf) => {
+  const vrm = gltf.userData.vrm;
+  const blendShapeProxy = vrm.blendShapeProxy;
+  
+  // Set viseme weights
+  blendShapeProxy.setValue('viseme_aa', 0.8);
+});
+```
+
+**VRM-specific notes**:
+- Use `blendShapeProxy` instead of direct morph target access
+- VRM models often use ARKit naming - you may need mapping
+
+---
+
+#### Ready Player Me
+
+Ready Player Me avatars come with viseme support out of the box:
+
+```javascript
+// RPM models have Oculus visemes by default
+const avatar = await loadRPMAvatar(url);
+const head = avatar.getObjectByName('Wolf3D_Head');
+
+// Morph targets are already named correctly
+head.morphTargetDictionary; // Contains all 15 visemes
+```
+
+**RPM advantages**:
+- Pre-configured viseme morph targets
+- Optimized for web performance
+- Consistent naming across all avatars
+
+---
+
+### Integration Guide
+
+#### Three.js / React Three Fiber
+
+```typescript
+import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+import { lipsyncManager } from './App';
+
+function Avatar() {
+  const { scene } = useGLTF('/avatar.glb');
+  const headRef = useRef();
+
+  useFrame(() => {
+    if (!headRef.current) return;
+    
+    const { morphTargetDictionary, morphTargetInfluences } = headRef.current;
+    const viseme = lipsyncManager.viseme;
+    
+    // Get index of current viseme
+    const index = morphTargetDictionary[viseme];
+    
+    if (index !== undefined) {
+      // Smooth transition using lerp
+      morphTargetInfluences.forEach((influence, i) => {
+        const target = i === index ? 1.0 : 0.0;
+        morphTargetInfluences[i] += (target - influence) * 0.3;
+      });
+    }
+  });
+
+  return <primitive object={scene} ref={headRef} />;
+}
+```
+
+---
+
+### Troubleshooting
+
+#### Model Not Animating
+
+1. **Check morph target names**:
+```javascript
+console.log(mesh.morphTargetDictionary);
+// Should show: { viseme_sil: 0, viseme_PP: 1, ... }
+```
+
+2. **Verify morph target influences**:
+```javascript
+console.log(mesh.morphTargetInfluences);
+// Should be an array of numbers [0-1]
+```
+
+3. **Ensure mesh is correctly referenced**:
+```javascript
+// Find mesh with morph targets
+scene.traverse((child) => {
+  if (child.isMesh && child.morphTargetDictionary) {
+    console.log('Found morph targets on:', child.name);
+  }
+});
+```
+
+---
+
+#### Performance Issues
+
+- **Use morph target limits**: Most 3D engines support setting max active targets
+- **Optimize mesh geometry**: High poly counts affect morph target performance
+- **Use LOD**: Lower detail models for distant characters
+
+---
+
+### Creating Custom Visemes
+
+If your model doesn't have visemes, you can create them in Blender:
+
+1. Import your character model
+2. Enter Edit Mode on the head mesh
+3. Create shape keys for each viseme
+4. Export as glTF with morph targets enabled
+5. Ensure shape key names match viseme enum values
+
+**Blender Export Settings**:
+- ✅ Include: Morphs
+- ✅ Morph Normal: Tangent
+- Format: glTF Binary (.glb)
 
 ---
 

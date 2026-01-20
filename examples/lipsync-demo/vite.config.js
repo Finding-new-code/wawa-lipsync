@@ -12,5 +12,8 @@ export default defineConfig({
       ),
     },
   },
+  server: {
+    allowedHosts: ['.trycloudflare.com'],
+  },
   plugins: [react()],
 });
