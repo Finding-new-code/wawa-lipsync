@@ -36,15 +36,11 @@ export const UI = () => {
     <section className="flex flex-col-reverse lg:flex-row overflow-hidden h-full w-full">
       <div className="p-10 lg:max-w-2xl overflow-y-auto">
         <a
-          className="pointer-events-auto select-none opacity-0 animate-fade-in-down animation-delay-200 "
-          href="https://wawasensei.dev"
+          className="pointer-events-auto select-none opacity-0 animate-fade-in-down animation-delay-200 text-white font-bold text-2xl"
+          href="https://cynerza.com"
           target="_blank"
         >
-          <img
-            src="/images/wawasensei.png"
-            alt="Wawa Sensei logo"
-            className="w-20 h-20 object-contain"
-          />
+          CYNERZA
         </a>
         <Visualizer />
       </div>
@@ -58,10 +54,10 @@ export const UI = () => {
           <div className="bottom-4 fixed z-20 right-4 md:right-15 flex items-center gap-4 animation-delay-1500 animate-fade-in-up opacity-0 ">
             <div className="w-20 h-px bg-white/60"></div>
             <a
-              href="https://lessons.wawasensei.dev/courses/react-three-fiber/"
+              href="https://cynerza.com"
               className="text-white/60 text-xs pointer-events-auto select-none"
             >
-              Learn Three.js & React Three Fiber
+              Built by Cynerza
             </a>
           </div>
         </div>
