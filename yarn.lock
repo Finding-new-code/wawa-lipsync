@@ -1505,7 +1505,7 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz"
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
-"lipsync-demo@file:C:\\Users\\ninetales\\wawa-lipsync\\examples\\lipsync-demo":
+"lipsync-demo@file:G:\\Finding-new-code\\wawa-lipsync\\examples\\lipsync-demo":
   version "1.0.0"
   resolved "file:examples/lipsync-demo"
   dependencies:
@@ -2304,7 +2304,7 @@ wawa-lipsync@^0.0.1:
   resolved "https://registry.npmjs.org/wawa-lipsync/-/wawa-lipsync-0.0.1.tgz"
   integrity sha512-4ynJX3LcztOi1vvnfzxxXiqewYxd1teY2EpQ+YfOT8T0WvUXlRouJ15gaBXabFe8eHq2EB8C5X5aGYxrNM1Daw==
 
-"wawa-lipsync@file:C:\\Users\\ninetales\\wawa-lipsync\\packages\\wawa-lipsync":
+"wawa-lipsync@file:G:\\Finding-new-code\\wawa-lipsync\\packages\\wawa-lipsync":
   version "0.0.2"
   resolved "file:packages/wawa-lipsync"
 
